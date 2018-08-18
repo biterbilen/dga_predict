@@ -9,7 +9,7 @@ classifiers and are simple to implement in Keras.
 
 ## Running the code
 
-`python run.py` will download and generate all the data, train and evaluate the classifier, and save a PNG to disk (the ROC curve). 
+`python3 run.py` will download and generate all the data, train and evaluate the classifier, and save a PNG to disk (the ROC curve). 
 It defaults to 1 fold to speed things up.  This code will run on your local machine or on a machine with a GPU (GPU will of course
 be much faster).
 
