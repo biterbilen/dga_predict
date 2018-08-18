@@ -9,6 +9,7 @@ from keras.layers.recurrent import LSTM
 import sklearn
 from sklearn.cross_validation import train_test_split
 
+MODEL_FILE = 'lstm.pkl'
 
 def build_model(max_features, maxlen):
     """Build LSTM model"""
@@ -48,14 +49,14 @@ def run(max_epoch=25, nfolds=10, batch_size=128):
     final_data = []
 
     for fold in range(nfolds):
-        print "fold %u/%u" % (fold+1, nfolds)
+        print("fold %u/%u" % (fold+1, nfolds))
         X_train, X_test, y_train, y_test, _, label_test = train_test_split(X, y, labels, 
                                                                            test_size=0.2)
 
-        print 'Build model...'
+        print('Build model...')
         model = build_model(max_features, maxlen)
 
-        print "Train..."
+        print("Train...")
         X_train, X_holdout, y_train, y_holdout = train_test_split(X_train, y_train, test_size=0.05)
         best_iter = -1
         best_auc = 0.0
@@ -67,7 +68,7 @@ def run(max_epoch=25, nfolds=10, batch_size=128):
             t_probs = model.predict_proba(X_holdout)
             t_auc = sklearn.metrics.roc_auc_score(y_holdout, t_probs)
 
-            print 'Epoch %d: auc = %f (best=%f)' % (ep, t_auc, best_auc)
+            print('Epoch %d: auc = %f (best=%f)' % (ep, t_auc, best_auc))
 
             if t_auc > best_auc:
                 best_auc = t_auc
@@ -78,7 +79,9 @@ def run(max_epoch=25, nfolds=10, batch_size=128):
                 out_data = {'y':y_test, 'labels': label_test, 'probs':probs, 'epochs': ep,
                             'confusion_matrix': sklearn.metrics.confusion_matrix(y_test, probs > .5)}
 
-                print sklearn.metrics.confusion_matrix(y_test, probs > .5)
+#                print(sklearn.metrics.confusion_matrix(y_test, probs > .5))
+#                print("{} {}".format(__name__, "breaking prematurely"))
+                break
             else:
                 # No longer improving...break and calc statistics
                 if (ep-best_iter) > 2:
@@ -86,4 +89,6 @@ def run(max_epoch=25, nfolds=10, batch_size=128):
 
         final_data.append(out_data)
 
+    if savemodel:
+        pickle.dump(model, open(MODEL_FILE, 'wb'))
     return final_data

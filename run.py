@@ -14,30 +14,32 @@ from sklearn.metrics import roc_curve, auc
 
 RESULT_FILE = 'results.pkl'
 
-def run_experiments(isbigram=True, islstm=True, nfolds=10):
+def run_experiments(isbigram=True, islstm=True, nfolds=10, savemodel=False):
     """Runs all experiments"""
     bigram_results = None
     lstm_results = None
 
     if isbigram:
-        bigram_results = bigram.run(nfolds=nfolds)
+        bigram_results = bigram.run(nfolds=nfolds, savemodel=savemodel)
 
     if islstm:
-        lstm_results = lstm.run(nfolds=nfolds)
+        lstm_results = lstm.run(nfolds=nfolds, savemodel=savemodel)
 
     return bigram_results, lstm_results
 
-def create_figs(isbigram=True, islstm=True, nfolds=10, force=False):
+def create_figs(isbigram=True, islstm=True, nfolds=10, force=False, savemodel=False):
     """Create figures"""
     # Generate results if needed
     if force or (not os.path.isfile(RESULT_FILE)):
-        bigram_results, lstm_results = run_experiments(isbigram, islstm, nfolds)
+        bigram_results, lstm_results = run_experiments(isbigram, islstm, nfolds, savemodel)
 
         results = {'bigram': bigram_results, 'lstm': lstm_results}
 
-        pickle.dump(results, open(RESULT_FILE, 'w'))
+        #pickle.dump(results, open(RESULT_FILE, 'w'))
+        pickle.dump(results, open(RESULT_FILE, 'wb'))
     else:
-        results = pickle.load(open(RESULT_FILE))
+        #results = pickle.load(open(RESULT_FILE))
+        results = pickle.load(open(RESULT_FILE, "rb"))
 
     # Extract and calculate bigram ROC
     if results['bigram']:
@@ -50,7 +52,7 @@ def create_figs(isbigram=True, islstm=True, nfolds=10, force=False):
             tpr.append(t_tpr)
         bigram_binary_fpr, bigram_binary_tpr, bigram_binary_auc = calc_macro_roc(fpr, tpr)
 
-    # xtract and calculate LSTM ROC
+    # Extract and calculate LSTM ROC
     if results['lstm']:
         lstm_results = results['lstm']
         fpr = []
@@ -92,4 +94,4 @@ def calc_macro_roc(fpr, tpr):
     return all_fpr, mean_tpr / len(tpr), auc(all_fpr, mean_tpr) / len(tpr)
 
 if __name__ == "__main__":
-    create_figs(nfolds=1) # Run with 1 to make it fast
+    create_figs(nfolds=1, savemodel=True) # Run with 1 to make it fast

@@ -1,10 +1,19 @@
 """Generates data for train/test algorithms"""
+from __future__ import print_function
+from __future__ import division 
+
 from datetime import datetime
-from StringIO import StringIO
-from urllib import urlopen
+try:
+    from StringIO import StringIO
+    from urllib import urlopen
+    import cPickle as pickle
+except ImportError:
+    from io import BytesIO
+    from urllib.request import urlopen
+    import pickle
+
 from zipfile import ZipFile
 
-import cPickle as pickle
 import os
 import random
 import tldextract
@@ -21,8 +30,9 @@ DATA_FILE = 'traindata.pkl'
 def get_alexa(num, address=ALEXA_1M, filename='top-1m.csv'):
     """Grabs Alexa 1M"""
     url = urlopen(address)
-    zipfile = ZipFile(StringIO(url.read()))
-    return [tldextract.extract(x.split(',')[1]).domain for x in \
+    zipfile = ZipFile(BytesIO(url.read()))
+    #return [tldextract.extract(x.decode("utf-8").split(',')[1].encode("utf-8")).domain for x in \
+    return [tldextract.extract(x.decode().split(',')[1]).domain for x in \
             zipfile.read(filename).split()[:num]]
 
 def gen_malicious(num_per_dga=10000):
@@ -43,7 +53,7 @@ def gen_malicious(num_per_dga=10000):
                      'albuquerque', 'sanfrancisco', 'sandiego', 'losangeles', 'newyork',
                      'atlanta', 'portland', 'seattle', 'washingtondc']
 
-    segs_size = max(1, num_per_dga/len(banjori_seeds))
+    segs_size = max(1, num_per_dga // len(banjori_seeds))
     for banjori_seed in banjori_seeds:
         domains += banjori.generate_domains(segs_size, banjori_seed)
         labels += ['banjori']*segs_size
@@ -53,7 +63,7 @@ def gen_malicious(num_per_dga=10000):
 
     # Create different length domains using cryptolocker
     crypto_lengths = range(8, 32)
-    segs_size = max(1, num_per_dga/len(crypto_lengths))
+    segs_size = max(1, num_per_dga // len(crypto_lengths))
     for crypto_length in crypto_lengths:
         domains += cryptolocker.generate_domains(segs_size,
                                                  seed_num=random.randint(1, 1000000),
@@ -64,14 +74,14 @@ def gen_malicious(num_per_dga=10000):
     labels += ['dircrypt']*num_per_dga
 
     # generate kraken and divide between configs
-    kraken_to_gen = max(1, num_per_dga/2)
+    kraken_to_gen = max(1, num_per_dga // 2)
     domains += kraken.generate_domains(kraken_to_gen, datetime(2016, 1, 1), 'a', 3)
     labels += ['kraken']*kraken_to_gen
     domains += kraken.generate_domains(kraken_to_gen, datetime(2016, 1, 1), 'b', 3)
     labels += ['kraken']*kraken_to_gen
 
     # generate locky and divide between configs
-    locky_gen = max(1, num_per_dga/11)
+    locky_gen = max(1, num_per_dga // 11)
     for i in range(1, 12):
         domains += lockyv2.generate_domains(locky_gen, config=i)
         labels += ['locky']*locky_gen
@@ -86,7 +96,7 @@ def gen_malicious(num_per_dga=10000):
 
     # ramdo divided over different lengths
     ramdo_lengths = range(8, 32)
-    segs_size = max(1, num_per_dga/len(ramdo_lengths))
+    segs_size = max(1, num_per_dga // len(ramdo_lengths))
     for rammdo_length in ramdo_lengths:
         domains += ramdo.generate_domains(segs_size,
                                           seed_num=random.randint(1, 1000000),
@@ -99,7 +109,7 @@ def gen_malicious(num_per_dga=10000):
 
     # simda
     simda_lengths = range(8, 32)
-    segs_size = max(1, num_per_dga/len(simda_lengths))
+    segs_size = max(1, num_per_dga // len(simda_lengths))
     for simda_length in range(len(simda_lengths)):
         domains += simda.generate_domains(segs_size,
                                           length=simda_length,
@@ -123,10 +133,13 @@ def gen_data(force=False):
         domains += get_alexa(len(domains))
         labels += ['benign']*len(domains)
 
-        pickle.dump(zip(labels, domains), open(DATA_FILE, 'w'))
+        #pickle.dump(zip(labels, domains), open(DATA_FILE, 'w'))
+        pickle.dump(list(zip(labels, domains)), open(DATA_FILE, 'wb'))
 
 def get_data(force=False):
     """Returns data and labels"""
     gen_data(force)
 
-    return pickle.load(open(DATA_FILE))
+    #return pickle.load(open(DATA_FILE))
+    return pickle.load(open(DATA_FILE, 'rb'))
+
