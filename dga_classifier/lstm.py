@@ -1,4 +1,9 @@
 """Train and test LSTM classifier"""
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 import dga_classifier.data as data
 import numpy as np
 from keras.preprocessing import sequence
@@ -9,7 +14,9 @@ from keras.layers.recurrent import LSTM
 import sklearn
 from sklearn.cross_validation import train_test_split
 
-MODEL_FILE = 'lstm.pkl'
+MODEL_FILE = 'lstm.h5'
+VALIDCHAR_FILE = 'valid.pkl'
+MAXLEN_FILE = 'maxlen.pkl'
 
 def build_model(max_features, maxlen):
     """Build LSTM model"""
@@ -25,7 +32,7 @@ def build_model(max_features, maxlen):
 
     return model
 
-def run(max_epoch=25, nfolds=10, batch_size=128):
+def run(max_epoch=25, nfolds=10, batch_size=128, savemodel=False):
     """Run train/test on logistic regression model"""
     indata = data.get_data()
 
@@ -38,6 +45,10 @@ def run(max_epoch=25, nfolds=10, batch_size=128):
 
     max_features = len(valid_chars) + 1
     maxlen = np.max([len(x) for x in X])
+
+    # pickle encoding params
+    pickle.dump(valid_chars, open(VALIDCHAR_FILE, 'wb'))
+    pickle.dump(maxlen, open(MAXLEN_FILE, 'wb'))
 
     # Convert characters to int and pad
     X = [[valid_chars[y] for y in x] for x in X]
@@ -90,5 +101,5 @@ def run(max_epoch=25, nfolds=10, batch_size=128):
         final_data.append(out_data)
 
     if savemodel:
-        pickle.dump(model, open(MODEL_FILE, 'wb'))
+        model.save(MODEL_FILE)
     return final_data

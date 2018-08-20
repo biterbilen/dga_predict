@@ -20,7 +20,7 @@ actenv:
 	@echo RUN: source activate $(PROJECT_NAME)
 
 clean:
-	@rm traindata.pkl traindata.png log lstm.h5 bigram.h5 
+	@rm -rf traindata.pkl lstm.h5 bigram.h5 results.p?? valid.pkl maxlen.pkl log
 
 testenv:
 	@echo TODO
@@ -35,8 +35,8 @@ sync_data_to_s3:
 sync_data_from_s3:
 	@echo TODO
 
-train:
-	$(PYTHON_INTERPRETER) run.py &> log
+train: clean
+	$(PYTHON_INTERPRETER) run.py 2>&1 | tee log
 
 pred: 
 	@echo TODO

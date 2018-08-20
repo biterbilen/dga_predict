@@ -1,4 +1,9 @@
 """Train and test bigram classifier"""
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 import dga_classifier.data as data
 from keras.layers.core import Dense
 from keras.models import Sequential
@@ -6,7 +11,7 @@ import sklearn
 from sklearn import feature_extraction
 from sklearn.cross_validation import train_test_split
 
-MODEL_FILE = 'bigram.pkl'
+MODEL_FILE = 'bigram.h5'
 
 def build_model(max_features):
     """Builds logistic regression model"""
@@ -81,5 +86,5 @@ def run(max_epoch=50, nfolds=10, batch_size=128, savemodel=False):
         final_data.append(out_data)
 
     if savemodel:
-        pickle.dump(model, open(MODEL_FILE, 'wb'))
+        model.save(MODEL_FILE)
     return final_data
