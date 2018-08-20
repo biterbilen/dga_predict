@@ -30,4 +30,9 @@ def predict_record(X=[b'www.google.com', b'www.fsgjs717i1ndhahdhd.com']):
     # predict
     t_probs = model.predict_proba(X)
     
-    return t_prob
+    return t_probs
+
+if __name__ == "__main__":
+    probs = predict_record()
+    print(probs)
+
