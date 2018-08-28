@@ -7,7 +7,7 @@ PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BUCKET = [OPTIONAL] your-bucket-for-syncing-data (do not include 's3://')
 PROFILE = default
 PROJECT_NAME = dga_predict
-PYTHON_INTERPRETER = python3
+PYTHON_INTERPRETER = python=3
 CONFIG_FILE = $(PROJECT_DIR)/config
 
 #################################################################################

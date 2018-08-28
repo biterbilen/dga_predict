@@ -1,1 +1,6 @@
+# Code
 *.pyc
+
+# Data
+*.pkl
+*.h5
