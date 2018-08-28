@@ -14,7 +14,7 @@ CONFIG_FILE = $(PROJECT_DIR)/config
 # COMMANDS                                                                      #
 #################################################################################
 creenv:
-	conda create --name $(PROJECT_NAME) python=3
+	conda create --name $(PROJECT_NAME) $(PYTHON_INTERPRETER)
 
 actenv:
 	@echo RUN: source activate $(PROJECT_NAME)
